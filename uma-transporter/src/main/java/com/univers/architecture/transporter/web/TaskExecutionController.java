@@ -31,10 +31,8 @@ public class TaskExecutionController {
 													@RequestParam("key") Optional<String> key , @RequestParam("filter") Optional<String> filter) {
 
 
-		if(key.isPresent() && filter.isPresent()) {
+		if(key.isPresent() && filter.isPresent())
 			return this.taskExecutionService.searchInTaskExecution(page, size, sort, direction, key.get(), filter.get());
-		}
-		else
-		return this.taskExecutionService.getAllTaskExecution(page,size,sort,direction);
+			return this.taskExecutionService.getAllTaskExecution(page,size,sort,direction);
 	}
 }

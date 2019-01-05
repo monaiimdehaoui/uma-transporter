@@ -13,9 +13,11 @@
 <body>
 
 <div  ng-app="myApp" ng-controller="myCtrl">
-  <h2>uma-transport-client</h2>
+  <div class="jumbotron text-center">
+    <h1>UMA_Tranporter_Client</h1>
+  </div>
+  <div class="col-md-12">
   <div >
-
     search : <input type="text" ng-change="Search()" ng-model="key"> by :
     <select  ng-change="Search()" ng-model="filter" ng-options="x for x in attrs">
     </select>
@@ -26,10 +28,11 @@
         <option value="20">20</option>
         </select> </div>
 </div>
-       
-  <table class="table table-condensed">
+  
+  <div class="table-responsive">
+  <table class="table-bordered">
     <thead>
-      <tr>
+      <tr class="success">
         <th ng-click="Sort('id')">id</th>
         <th ng-click="Sort('creationDate')">creation_Date</th>
         <th ng-click="Sort('taskConfigName')">task_Config_Name</th>
@@ -61,6 +64,8 @@
       </tr>
     </tbody>
   </table>
+</div>
+</div>
   <div class="col-md-offset-5">
       Size : <input type="number" style="width: 50px;" ng-model="size" ng-change="change()">
       <button ng-click="Move('<<')"><<</button>
@@ -86,8 +91,8 @@
         var IntervalID;
        getData(count,$scope.size,$scope.sort,$scope.direction);
        
-       $scope.Move = function(sign){
-      
+  // moving from page to another using the pagination buttons
+  $scope.Move = function(sign){
       if(sign =="<" && count > 0 ){count--; getData(count);} 
      else if (sign == ">" && count < max_pages-1){ count++; getData(count);}
      else if (sign==">>" && count !=max_pages-1){ count = max_pages-1;getData(count);}
@@ -97,16 +102,17 @@
       getData();
   }
  
+ // this function call the javascript function setInterval and search to refresh the table and check 
+ // if there is any new changes 
   $scope.sync = function(){
     clearInterval(IntervalID);
      IntervalID = setInterval(function(){
     $scope.Search();
-    alert($scope.value);
   },$scope.value*1000);
   }
  
   
- 
+  // order data asc or desc depending on the column clicked and the number of clicks 
   $scope.Sort = function(attr){
       if($scope.sort == attr ){
        if($scope.direction =="asc") $scope.direction = "desc";
@@ -118,6 +124,8 @@
       }
       getData(count,$scope.size,$scope.sort,$scope.direction);
   }
+
+  // get the search results (using the same service as getData())
   $scope.Search = function(){
  $http.get("http://localhost:8080/api/taskExecution?page="+count+"&size="+$scope.size+"&sort="+
         $scope.sort+"&direction="+$scope.direction+"&filter="+$scope.filter+"&key="+$scope.key)
@@ -127,6 +135,8 @@
     });
 
   }
+
+  // http request to the server to get the wanted data 
   function getData(page = count,size =$scope.size ,sort =$scope.sort,direction =$scope.direction){
     $http.get("http://localhost:8080/api/taskExecution?page="+page+"&size="+size+"&sort="+sort+"&direction="+direction)
          .then(function(response) {
