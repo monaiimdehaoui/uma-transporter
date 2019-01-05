@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="angular.min.js"></script>
+
+</head>
+<body>
+
+<div  ng-app="myApp" ng-controller="myCtrl">
+  <h2>uma-transport-client</h2>
+  <div >
+
+    search : <input type="text" ng-change="Search()" ng-model="key"> by :
+    <select  ng-change="Search()" ng-model="filter" ng-options="x for x in attrs">
+    </select>
+    <div class="col-md-offset-5" >Sync : <select ng-model ="value" ng-change="sync()">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+        </select> </div>
+</div>
+       
+  <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th ng-click="Sort('id')">id</th>
+        <th ng-click="Sort('creationDate')">creation_Date</th>
+        <th ng-click="Sort('taskConfigName')">task_Config_Name</th>
+        <th ng-click="Sort('durationInSeconds')">duration_In_Seconds</th>
+        <th ng-click="Sort('status')">status</th>
+        <th ng-click="Sort('transportedFiles')">transported_Files</th>
+        <th ng-click="Sort('message')">message</th>
+        <th ng-click="Sort('emailErrorSent')">email_Error_Sent</th>
+        <th ng-click="Sort('startDate')">start_Date</th>
+        <th ng-click="Sort('endDate')">end_Date</th>
+        <th ng-click="Sort('inProgressCopyDetected')">in_progress_copy_detected</th>
+        <th ng-click="Sort('nbrCheckInProgressCopy')">nbr_check_in_progress_copy</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="trans in transport_list">
+        <td>{{trans.id}}</td>
+        <td>{{trans.creationDate}}</td>
+        <td>{{trans.taskConfigName}}</td>
+        <td>{{trans.durationInSeconds}}</td>
+        <td>{{trans.status}}</td>
+        <td>{{trans.transportedFiles}}</td>
+        <td>{{trans.message}}</td>
+        <td>{{trans.emailErrorSent}}</td>
+        <td>{{trans.startDate}}</td>
+        <td>{{trans.endDate}}</td>
+        <td>{{trans.inProgressCopyDetected}}</td>
+        <td>{{trans.nbrCheckInProgressCopy}}</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="col-md-offset-5">
+      Size : <input type="number" style="width: 50px;" ng-model="size" ng-change="change()">
+      <button ng-click="Move('<<')"><<</button>
+      <button ng-click="Move('<')"><</button>
+      <button ng-click="Move('>')">></button>
+      <button ng-click="Move('>>')">>></button>
+  </div>
+</div>
+<script>
+    var app = angular.module('myApp', []);
+    app.controller('myCtrl', function($scope, $http) {
+        $scope.attrs = ["id", "taskConfigName" ,"transportedFiles"
+        ,"message"];
+        var max_pages ;
+        var count =0;
+        $scope.size = 1;
+        $scope.sort = "id";
+        $scope.direction ="asc";
+        $scope.transport_list =[];
+        $scope.key = "";
+        $scope.filter = "id";
+        $scope.value = 5;
+        var IntervalID;
+       getData(count,$scope.size,$scope.sort,$scope.direction);
+       
+       $scope.Move = function(sign){
+      
+      if(sign =="<" && count > 0 ){count--; getData(count);} 
+     else if (sign == ">" && count < max_pages-1){ count++; getData(count);}
+     else if (sign==">>" && count !=max_pages-1){ count = max_pages-1;getData(count);}
+     else if(sign=="<<" && count != 0){count = 0;getData(count);}
+  }
+  $scope.change = function(sign){
+      getData();
+  }
+ 
+  $scope.sync = function(){
+    clearInterval(IntervalID);
+     IntervalID = setInterval(function(){
+    $scope.Search();
+    alert($scope.value);
+  },$scope.value*1000);
+  }
+ 
+  
+ 
+  $scope.Sort = function(attr){
+      if($scope.sort == attr ){
+       if($scope.direction =="asc") $scope.direction = "desc";
+       else if($scope.direction =="desc") $scope.direction = "asc";
+      }
+      else  {
+        $scope.sort=attr;
+        $scope.direction = "asc"
+      }
+      getData(count,$scope.size,$scope.sort,$scope.direction);
+  }
+  $scope.Search = function(){
+ $http.get("http://localhost:8080/api/taskExecution?page="+count+"&size="+$scope.size+"&sort="+
+        $scope.sort+"&direction="+$scope.direction+"&filter="+$scope.filter+"&key="+$scope.key)
+         .then(function(response) {
+      $scope.transport_list = response.data.content;
+    max_pages = response.data.totalPages;
+    });
+
+  }
+  function getData(page = count,size =$scope.size ,sort =$scope.sort,direction =$scope.direction){
+    $http.get("http://localhost:8080/api/taskExecution?page="+page+"&size="+size+"&sort="+sort+"&direction="+direction)
+         .then(function(response) {
+      $scope.transport_list = response.data.content;
+    max_pages = response.data.totalPages;
+    });
+  }
+    });
+    </script> 
+</body>
+</html>
