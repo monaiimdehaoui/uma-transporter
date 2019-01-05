@@ -25,7 +25,4 @@ public interface ITaskExecutionRepository extends PagingAndSortingRepository<Tas
     Page<TaskExecution> findByIdContaining(String key, Pageable pages);
     Page<TaskExecution> findByCreationDateContaining(String key, Pageable pages);
 
-
-
-
 }
